@@ -140,6 +140,7 @@ static async_at_time_worker_t temperature_worker = { .do_work = temperature_work
 static void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status); // Conexão MQTT
 static void start_client(MQTT_CLIENT_DATA_T *state); // Inicializar o cliente MQTT
 static void dns_found(const char *hostname, const ip_addr_t *ipaddr, void *arg); // Call back com o resultado do DNS
+int64_t buzzer_off_callback(alarm_id_t id, void *user_data); // Callback para desligar o buzzer quando o alarme disparar
 
 // Função principal
 int main(void) {
@@ -418,9 +419,8 @@ static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
         }
     } else if (strcmp(basic_topic, "/casa/cortina/comando") == 0) { 
 
-        pwm_set_gpio_level(buzzer_pin_l, 60); 
-        busy_wait_ms(1000); 
-        pwm_set_gpio_level(buzzer_pin_l, 0); 
+        pwm_set_gpio_level(buzzer_pin_l, 60);
+        add_alarm_in_ms(1500, buzzer_off_callback, NULL, false);
 
     } else if (strcmp(basic_topic, "/print") == 0) {
         INFO_printf("%.*s\n", len, data); 
@@ -511,3 +511,8 @@ static void dns_found(const char *hostname, const ip_addr_t *ipaddr, void *arg) 
     }
 }
 
+int64_t buzzer_off_callback(alarm_id_t id, void *user_data) {
+    pwm_set_gpio_level(buzzer_pin_l, 0); // Desliga o PWM do buzzer
+    INFO_printf("Buzzer desligado pelo alarme.\n");
+    return 0; // Retorna 0 para não reagendar o alarme
+}
