@@ -35,6 +35,6 @@ O sistema atual permite:
 
 Assista a uma demonstração do projeto em funcionamento:
 
-**(Link para o Vídeo do YouTube Aqui)**
+**https://youtu.be/qb3NYBdKgMk**
 
 ---
